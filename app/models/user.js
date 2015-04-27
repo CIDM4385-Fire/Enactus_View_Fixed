@@ -70,6 +70,49 @@ exports.definition = {
           }
         });
       },
+      
+      authenticated : function() {
+        var cloud = this.config.Cloud;
+        var TAP = Ti.App.Properties;
+
+        if (TAP.hasProperty("sessionId")) {
+          Ti.API.info("SESSION ID " + TAP.getString("sessionId"));
+          cloud.sessionId = TAP.getString("sessionId");
+          return true;
+        }
+        return false;
+      },
+      /**
+       *
+       * @param {Object} _callback
+       */
+      showMe : function(_callback) {
+        var cloud = this.config.Cloud;
+        var TAP = Ti.App.Properties;
+        cloud.Users.showMe(function(e) {
+          if (e.success) {
+            var user = e.users[0];
+            TAP.setString("sessionId", e.meta.session_id);
+            TAP.setString("user", JSON.stringify(user));
+            _callback && _callback({
+              success : true,
+              model : new model(user)
+            });
+          } else {
+            Ti.API.error(e);
+
+            // clean up
+            TAP.removeProperty("sessionId");
+            TAP.removeProperty("user");
+
+            _callback && _callback({
+              success : false,
+              model : null,
+              error : e
+            });
+          }
+        });
+      },
 			
 		});
 
