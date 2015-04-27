@@ -42,7 +42,34 @@ exports.definition = {
           }
         });
       },
-			
+      
+      
+	//Jack did this		
+      logout : function(_callback) {
+        var cloud = this.config.Cloud;
+        var TAP = Ti.App.Properties;
+
+        cloud.Users.logout(function(e) {
+          if (e.success) {
+            var user = e.users[0];
+            TAP.removeProperty("sessionId");
+            TAP.removeProperty("user");
+
+            // callback clearing out the user model
+            _callback && _callback({
+              success : true,
+              model : null
+            });
+          } else {
+            Ti.API.error(e);
+            _callback && _callback({
+              success : false,
+              model : null,
+              error : e
+            });
+          }
+        });
+      },
 			
 		});
 
